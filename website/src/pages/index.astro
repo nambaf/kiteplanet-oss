@@ -1,0 +1,447 @@
+---
+import Base from '../layouts/Base.astro';
+
+const REPO_URL = 'https://github.com/nambaf/kiteplanet-oss';
+// TODO: sostituisci con l'URL Vercel reale dopo il primo deploy della demo live.
+const LIVE_DEMO_URL = 'https://kiteplanet.vercel.app';
+const DEPLOY_URL = `https://vercel.com/new/clone?repository-url=${REPO_URL}`;
+
+// Public assets must be prefixed with the configured `base` when deployed on a
+// GitHub Pages project site (https://nambaf.github.io/kiteplanet-oss/).
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+const shot = (name: string) => `${BASE}/screenshots/${name}`;
+---
+<Base>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#top" class="nav-brand">kiteplanet</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#cosa">cosa fa</a>
+        <a href="#dietro">com'è fatto</a>
+        <a href="#sorgenti">sorgenti</a>
+        <a href="#deploy">deploy</a>
+        <a href={REPO_URL} class="nav-cta">GitHub →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ───────── Hero ───────── -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">open source · MIT · no login</span>
+          <h1>
+            trova lo spot<br />
+            <span class="hero-accent">di kitesurf giusto.</span>
+          </h1>
+          <p class="hero-sub">
+            Vento, onda e marea da sorgenti open data, su un globo interattivo.
+            Niente login, niente database, niente API key obbligatorie — gira
+            out-of-the-box.
+          </p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href={LIVE_DEMO_URL}>Apri la demo live</a>
+            <a class="btn btn-secondary" href={REPO_URL}>Vedi su GitHub</a>
+          </div>
+          <p class="hero-meta">
+            Next.js 15 · three.js · 5 sorgenti open data · 50 spot
+          </p>
+        </div>
+
+        <div class="hero-visual">
+          <img
+            class="hero-screenshot"
+            src={shot('example-home.png')}
+            alt="Home di Kiteplanet: globo three.js con i pin degli spot e la strip delle sorgenti dati."
+            width="640"
+            height="420"
+            loading="eager"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Cosa fa ───────── -->
+    <section id="cosa" class="band-surface">
+      <div class="container">
+        <span class="eyebrow">cosa fa</span>
+        <h2>tutto quello che ti serve prima di entrare in acqua.</h2>
+        <ul class="feature-grid">
+          <li>
+            <h3>Globo interattivo</h3>
+            <p>Coste reali, atmosfera Fresnel, pin con snapshot live e cicloni come spirali rotanti. Ruota il mondo e trova lo spot.</p>
+          </li>
+          <li>
+            <h3>Vento, onda, marea</h3>
+            <p>Forecast 72h da Open-Meteo, osservazioni real-time dalle boe NOAA, maree da Stormglass dove serve.</p>
+          </li>
+          <li>
+            <h3>Raccomandazione kite</h3>
+            <p>Per ogni ora: ON / MARGINAL / OFF e la misura di kite consigliata, calcolata sui dati reali dello spot.</p>
+          </li>
+          <li>
+            <h3>Resiliente per design</h3>
+            <p>Ogni sorgente passa per <code>withResilience</code>: timeout, fallback, 5 stati. Niente pagine bianche, niente loading infiniti.</p>
+          </li>
+          <li>
+            <h3>Modalità demo / live</h3>
+            <p>Toggle persistito su cookie. In demo i dati sono mock deterministici — provala senza chiavi né rate limit.</p>
+          </li>
+          <li>
+            <h3>Bilingue IT / EN</h3>
+            <p>UI e pagina sorgenti dati in italiano e inglese, cookie-based, senza ricaricare.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ───────── Screenshots ───────── -->
+    <section class="shots">
+      <div class="container">
+        <div class="shots-row">
+          <figure class="shot">
+            <img class="shot-img" src={shot('example-spot.png')} alt="Scheda spot: condizioni attuali, scala Douglas dello stato del mare, forecast a slot in streaming." loading="lazy" />
+            <figcaption>
+              <h3>la scheda spot, in streaming</h3>
+              <p>La shell renderizza subito; ogni sorgente ha la sua <code>&lt;Suspense&gt;</code> e appare appena pronta. Un provider lento non blocca gli altri — condizioni, stato del mare e forecast arrivano in parallelo.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot">
+            <img class="shot-img" src={shot('example-data-sources.png')} alt="Pagina sorgenti dati: ogni provider con stato, cosa fornisce, env vars e licenza." loading="lazy" />
+            <figcaption>
+              <h3>sorgenti dati trasparenti</h3>
+              <p>La pagina <code>/data-sources</code> (bilingue) descrive ogni provider: cosa fornisce, come viene usato, env vars, licenza e gli spot che lo consumano. Il badge dice subito se è live, in demo o se serve una key.</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Com'è fatto ───────── -->
+    <section id="dietro" class="band-surface">
+      <div class="container">
+        <span class="eyebrow">com'è fatto</span>
+        <h2>qualche scelta tecnica, per i curiosi.</h2>
+        <p class="section-lead">
+          È un progetto personale, ma le decisioni sono documentate. Ecco quelle
+          che non si vedono dal README.
+        </p>
+
+        <div class="decision-grid">
+          <article class="decision paper-card">
+            <h3>Provider Registry + withResilience</h3>
+            <p>
+              Ogni sorgente esterna implementa la stessa interfaccia e passa SEMPRE
+              per un wrapper unico: timeout via <code>AbortController</code>, errori
+              catturati, sempre uno di 5 stati. La UI si adatta allo stato — non al
+              caso.
+            </p>
+          </article>
+
+          <article class="decision paper-card">
+            <h3>Streaming SSR + React cache()</h3>
+            <p>
+              I fetcher sono memoizzati per-request con <code>cache()</code>: più
+              <code>&lt;Suspense&gt;</code> boundary che chiedono lo stesso dato
+              pagano una sola fetch. Streaming per-sezione, dedupe gratis.
+            </p>
+          </article>
+
+          <article class="decision paper-card">
+            <h3>Demo / live a doppio livello</h3>
+            <p>
+              La mode vive su cookie (idratazione server-side, zero flash) con
+              localStorage di fallback. Atterri in demo: forecast deterministico,
+              nessuna fetch, nessuna chiave. Il toggle salva la preferenza.
+            </p>
+          </article>
+
+          <article class="decision paper-card">
+            <h3>Globo three.js fatto a mano</h3>
+            <p>
+              Terra triangolata con earcut (gestione antimeridiano), coste reali da
+              world-atlas, atmosfera Fresnel. Estetica "carta sketchy": filtro SVG
+              turbulence, font hand-drawn, palette carta.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────── Sorgenti dati ───────── -->
+    <section id="sorgenti">
+      <div class="container">
+        <span class="eyebrow">sorgenti dati</span>
+        <h2>cinque sorgenti open, dietro un'astrazione comune.</h2>
+        <div class="table-wrap">
+          <table class="sources">
+            <thead>
+              <tr><th>Provider</th><th>Categoria</th><th>Key</th><th>Free tier</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Open-Meteo</strong></td><td>vento, onda, SST</td><td>no</td><td>illimitato</td></tr>
+              <tr><td><strong>NOAA NDBC</strong></td><td>osservazioni real-time (boe)</td><td>no</td><td>illimitato</td></tr>
+              <tr><td><strong>NHC</strong></td><td>cicloni tropicali attivi</td><td>no</td><td>illimitato</td></tr>
+              <tr><td><strong>Wikipedia</strong></td><td>summary enciclopedico</td><td>no</td><td>illimitato</td></tr>
+              <tr><td><strong>Stormglass</strong></td><td>maree</td><td>sì</td><td>10 req/giorno</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="section-lead muted">
+          L'app gira al 100% senza API key: i provider che ne richiedono una mostrano
+          un badge "API key required" finché non la aggiungi. Stormglass si attiva
+          solo sugli spot dove la marea vale il budget.
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Deploy ───────── -->
+    <section id="deploy" class="band-surface">
+      <div class="container">
+        <span class="eyebrow">la tua copia</span>
+        <h2>da fork a online in pochi minuti.</h2>
+        <ol class="deploy-steps">
+          <li class="paper-card">
+            <h3>1. Forka la repo</h3>
+            <p>Clona il fork in locale: <code>pnpm install</code> e <code>pnpm dev</code>. Funziona subito, senza chiavi.</p>
+          </li>
+          <li class="paper-card">
+            <h3>2. Deploy su Vercel</h3>
+            <p>L'app usa streaming SSR, quindi serve un runtime Node. Vercel è il target raccomandato — un click col bottone qui sotto.</p>
+          </li>
+          <li class="paper-card">
+            <h3>3. (Opzionale) Stormglass</h3>
+            <p>Vuoi le maree? Aggiungi <code>STORMGLASS_API_KEY</code> nelle env di Vercel e abilita il flag sugli spot che ti interessano.</p>
+          </li>
+          <li class="paper-card">
+            <h3>4. Vetrina su Pages</h3>
+            <p>Questo sito statico (<code>website/</code>) si pubblica da solo su GitHub Pages a ogni push — ospita la vetrina, non l'app.</p>
+          </li>
+        </ol>
+        <p class="deploy-cta">
+          <a class="btn btn-primary" href={DEPLOY_URL}>Deploy with Vercel →</a>
+          <a class="btn btn-secondary" href={LIVE_DEMO_URL}>Apri la demo live</a>
+          <span class="deploy-note muted">Ogni passo è documentato nel README della repo.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────── Footer ───────── -->
+    <footer class="footer">
+      <div class="container footer-inner">
+        <p>
+          Fatto da <strong>Marco Di Felice</strong> — rilasciato sotto licenza MIT.
+        </p>
+        <p class="muted">
+          <a href={REPO_URL}>GitHub</a> ·
+          <a href={`${REPO_URL}/blob/main/LICENSE`}>Licenza</a> ·
+          <a href={`${REPO_URL}/blob/main/CONTRIBUTING.md`}>Contribuire</a>
+        </p>
+      </div>
+    </footer>
+  </main>
+</Base>
+
+<style>
+  /* ───────── Nav ───────── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: saturate(160%) blur(8px);
+    background: color-mix(in srgb, var(--canvas) 82%, transparent);
+    border-bottom: 1.5px solid var(--border-soft);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 58px;
+  }
+  .nav-brand {
+    font-family: var(--font-scribble);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2.5vw, 1.5rem);
+    font-size: 1.05rem;
+  }
+  .nav-links a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .nav-links a:hover { color: var(--warm); }
+  .nav-cta {
+    color: var(--accent-deep) !important;
+    font-weight: 700;
+  }
+  @media (max-width: 560px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* ───────── Hero ───────── */
+  .hero { padding-top: clamp(3rem, 7vw, 5rem); padding-bottom: clamp(3rem, 7vw, 5rem); }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  @media (max-width: 820px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-visual { order: -1; }
+  }
+  .hero-accent { color: var(--accent); }
+  .hero-sub {
+    margin-top: 1.25rem;
+    font-size: clamp(1.1rem, 1.5vw, 1.25rem);
+    color: var(--ink-soft);
+    max-width: 40ch;
+  }
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+  .hero-meta {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+  }
+
+  .hero-visual { display: flex; justify-content: center; }
+  .hero-screenshot {
+    width: 100%;
+    max-width: 580px;
+    height: auto;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    box-shadow: 4px 6px 0 rgba(31, 28, 24, 0.16);
+    display: block;
+  }
+
+  /* ───────── Bands ───────── */
+  .band-surface {
+    background: var(--paper);
+    border-top: 1.5px solid var(--border-soft);
+    border-bottom: 1.5px solid var(--border-soft);
+  }
+  .section-lead {
+    margin-top: 1rem;
+    color: var(--ink-soft);
+    max-width: 58ch;
+  }
+
+  /* ───────── Feature grid ───────── */
+  .feature-grid {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem 2rem;
+  }
+  .feature-grid h3 { margin-bottom: 0.35rem; color: var(--accent-deep); }
+  .feature-grid p { color: var(--ink-soft); font-size: 1rem; }
+
+  /* ───────── Screenshots ───────── */
+  .shots-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(2rem, 4vw, 3rem);
+  }
+  @media (max-width: 760px) {
+    .shots-row { grid-template-columns: 1fr; }
+  }
+  .shot { margin: 0; }
+  .shot-img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+    border: 1.5px solid var(--border);
+    box-shadow: 3px 4px 0 rgba(31, 28, 24, 0.15);
+    margin-bottom: 1rem;
+  }
+  .shot figcaption h3 { margin-bottom: 0.4rem; }
+  .shot figcaption p { color: var(--ink-soft); font-size: 0.98rem; }
+
+  /* ───────── Decisions ───────── */
+  .decision-grid {
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  .decision { padding: 1.5rem; }
+  .decision h3 { margin-bottom: 0.5rem; color: var(--ink); }
+  .decision h3::before { content: '≈ '; color: var(--accent); }
+  .decision p { color: var(--ink-soft); font-size: 0.98rem; }
+
+  /* ───────── Sources table ───────── */
+  .table-wrap { margin-top: 2rem; overflow-x: auto; }
+  .sources {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+  .sources th, .sources td {
+    text-align: left;
+    padding: 0.65rem 1rem;
+    border-bottom: 1.5px solid var(--border-soft);
+  }
+  .sources th {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+  }
+  .sources tbody tr:hover { background: var(--paper); }
+
+  /* ───────── Deploy ───────── */
+  .deploy-steps {
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+  .deploy-steps li { padding: 1.3rem; }
+  .deploy-steps h3 { margin-bottom: 0.4rem; color: var(--accent-deep); }
+  .deploy-steps p { color: var(--ink-soft); font-size: 0.96rem; }
+  .deploy-cta {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+  .deploy-note { font-size: 0.9rem; }
+
+  /* ───────── Footer ───────── */
+  .footer {
+    background: var(--canvas);
+    border-top: 1.5px solid var(--border-soft);
+    padding: 2rem 0;
+  }
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.98rem;
+  }
+  .footer a { color: var(--ink-soft); }
+  .footer a:hover { color: var(--warm); }
+</style>

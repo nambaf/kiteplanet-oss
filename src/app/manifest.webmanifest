@@ -1,0 +1,10 @@
+{
+  "name": "Kiteplanet",
+  "short_name": "Kiteplanet",
+  "description": "Trova lo spot di kitesurf giusto.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ece6d6",
+  "theme_color": "#ece6d6",
+  "icons": []
+}
