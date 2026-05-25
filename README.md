@@ -1,9 +1,10 @@
 # Kiteplanet
 
 > **🌐 Vetrina & screenshot → [nambaf.github.io/kiteplanet-oss](https://nambaf.github.io/kiteplanet-oss/)**
-> &nbsp;·&nbsp; **🚀 Demo live → [kiteplanet.vercel.app](https://kiteplanet.vercel.app)** <!-- TODO: sostituisci con l'URL Vercel reale dopo il deploy -->
+> &nbsp;·&nbsp; **🚀 Demo live → [kiteplanet-oss.vercel.app](https://kiteplanet-oss.vercel.app)**
 
 [![CI](https://github.com/nambaf/kiteplanet-oss/actions/workflows/ci.yml/badge.svg)](https://github.com/nambaf/kiteplanet-oss/actions/workflows/ci.yml)
+[![Demo](https://img.shields.io/badge/demo-live-e26a3e)](https://kiteplanet-oss.vercel.app)
 [![Website](https://img.shields.io/badge/vetrina-live-2b8caa)](https://nambaf.github.io/kiteplanet-oss/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
